@@ -56,7 +56,7 @@ set hive.compactor.initiator.on=true;
 set hive.compactor.worker.threads=2;
 ```
 
-![config](img/hue.PNG)
+![config](img/hue.png)
 
 Créer la table entreprises dans la database default
 
@@ -74,4 +74,4 @@ create table employees(id int ,name string, country string, department string, s
 ## Gestion des entreprises (CRUD)
 Swagger API :
 
-![swagger](img/swagger.PNG)
+![swagger](img/swagger.png)
