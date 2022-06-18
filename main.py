@@ -1,14 +1,23 @@
 import json
 
+import connexion
 import flask
 from pyhive import hive
-from flask import Flask, jsonify, Response, request, flash, redirect
+from flask import Flask, jsonify, Response, request, flash, redirect, make_response
 from employees import employees
+from pywebhdfs.webhdfs import PyWebHdfsClient
+import os
 
-app = Flask(__name__)
-
-connection = hive.connect(host="192.168.73.155", username="cloudera",
+connection = hive.connect(host="192.168.73.158", username="cloudera",
                           port=10000)
+
+hdfs = PyWebHdfsClient(host='192.168.73.158', port='50070', user_name='cloudera', timeout=1)
+
+# Création de  l'instance de l'application
+app = connexion.App(__name__, specification_dir='./')
+
+# Lecture du fichier swagger.yml pour définir les points d'arrivée (endpoints)
+app.add_api('swagger.yml' )
 
 
 # Get list of all employees
@@ -40,9 +49,14 @@ def getone(id):
     cursor.execute(query)
     test = cursor.fetchall()
     print(test)
-    employee = employees(test[0][0], test[0][1], test[0][2], test[0][3], test[0][4])
-    jsonStr = json.dumps(employee.__dict__)
-    return Response(jsonStr, mimetype='application/json')
+    if (len(test) > 0):
+        employee = employees(test[0][0], test[0][1], test[0][2], test[0][3], test[0][4])
+        jsonStr = json.dumps(employee.__dict__)
+        return Response(jsonStr, mimetype='application/json')
+    else:
+        return make_response(
+            "the employee don't exist. Please, change the id".format(lname=id), 200
+        )
 
 
 # Add 1 employees
@@ -70,7 +84,7 @@ def addone():
             # flash('User updated successfully!')
             return flask.redirect('/getall')
         else:
-            return 'Error while adding emplyees'
+            return 'Error while adding employee'
 
     finally:
         return flask.redirect('/getall')
@@ -116,10 +130,33 @@ def delete_emp(id):
         return flask.redirect('/getall')
 
     finally:
-        return flask.redirect('/getall')
+        return make_response(
+            "the company successfully deleted".format(lname=id), 200
+        )
 
 
+@app.route('/gethdfs', methods=['GET'])
+def gethdfs():
+    my_dir = '/user/cloudera/hiveproject/'
+    test = hdfs.list_dir(my_dir)
+    return Response(json.dumps(test), mimetype='application/json')
+
+
+@app.route('/createdirhdfs/<dir>', methods=['GET'])
+def createdirhdfs(dir):
+    my_dir = '/user/cloudera/hiveproject/' + dir
+    hdfs.make_dir(my_dir)
+    return flask.redirect('/gethdfs')
+
+
+# create a file in hdfs
+@app.route('/createhdfs', methods=['GET'])
+def createhdfs():
+    my_data = '01010101010101010101010101010101'
+    my_file = 'user/cloudera/hiveproject/myfile.txt'
+    hdfs.create_file(my_file, my_data, overwrite=True, blocksize=64)
+    return flask.redirect('/gethdfs')
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='127.0.0.1', port=5000, debug=True)

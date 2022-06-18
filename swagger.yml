@@ -1,0 +1,139 @@
+swagger: "2.0"
+info:
+  description: Fichier swagger associé à notre API
+  version: "1.0.0"
+  title: Swagger pour API ReST
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+paths:
+  /getall:
+    get:
+      operationId: module.read_all
+      tags:
+        - Employees
+      summary: Lecture de la liste entière
+      description: La liste des employés
+      responses:
+        200:
+          description: Résultat trouvé !
+
+
+  /get/{id}:
+    get:
+      operationId: module.read_one
+      tags:
+        - Employees
+      summary: La liste des employés
+      description: Affichage de la liste des employés
+      parameters:
+        - name: id
+          in: path
+          description: id de l'employé recherché
+          type: string
+          required: True
+      responses:
+        200:
+          description: Résultat trouvé !
+
+  /add:
+    post:
+      operationId: module.create
+      tags:
+        - Employees
+      summary: Enregistrer un employé
+      description: Ajout d'un employé
+      parameters:
+        - name: employe
+          in: body
+          description: Enregistrement à créer
+          required: True
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: id de l'employé
+              name:
+                type: string
+                description: Nom de l'employé
+              country:
+                type: string
+                description: Pays d'origine de l'employé
+              department:
+                type: string
+                description: Domaine de l'employé
+              salary:
+                type: integer
+                description: Salaire de l'employé
+      responses:
+        201:
+          description: L'employé a été ajoutée avec succes
+
+  /update/{id}:
+    post:
+      operationId: module.update
+      tags:
+        - Employees
+      summary: Mettre jour les données d'un employé
+      description: Mettre à jour un enregistremnt
+      parameters:
+        - name: id
+          in: path
+          description: id de l'employé
+          type: string
+          required: True
+        - name: employe
+          in: body
+          description: informations de l'employé
+          required: True
+          schema:
+            $ref: "#/definitions/Employees"
+      responses:
+        200:
+          description: Succès dans la mise à jour
+
+
+  /delete/{id}:
+    delete:
+      operationId: module.delete
+      tags:
+        - Employees
+      summary: Supprimer une employé
+      description: Supprimer un employé
+      parameters:
+        - name: id
+          in: path
+          description: id de l'employé
+          type: string
+          required: True
+      responses:
+        200:
+          description: Succès dans la suppression
+
+definitions:
+  Employees:
+    type: "object"
+    required:
+      - "name"
+      - "country"
+      - "department"
+      - "salary"
+    properties:
+      name:
+        type: "string"
+      country:
+        type: "string"
+      department:
+        type: "string"
+      salary:
+        type: "integer"
+    example:
+      name: "Alex"
+      country: "France"
+      department: "IT"
+      salary: 600000
