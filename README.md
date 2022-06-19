@@ -68,7 +68,7 @@ use company;
 create table employees(id int ,name string, country string, department string, salary int) clustered by (id) into 5 buckets stored as orc TBLPROPERTIES('transactional'='true');
 ```
 
-##Installation du package python Sasl pour Hive
+## Installation du package python Sasl pour Hive
 - Ajouter le folder sasl dans le venv de l'application (/Lib/site-packages)
 
 ## Gestion des entreprises (CRUD)
